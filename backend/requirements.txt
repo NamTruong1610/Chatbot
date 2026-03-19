@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+openai
+langchain
+langchain-openai
+langchain-community
+qdrant-client
+sentence-transformers
+unstructured[pdf,docx]
+python-multipart
+redis
+pydantic
+pydantic-settings
+langchain-text-splitters
