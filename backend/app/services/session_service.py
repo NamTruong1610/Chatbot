@@ -1,7 +1,10 @@
 # app/services/session_service.py
 import redis.asyncio as redis
 import json
+from sqlalchemy import select
 from app.config.config import settings
+from app.database import AsyncSessionLocal
+from app.models.user_summary_model import UserSummary
 
 class SessionService:
     def __init__(self):
@@ -19,9 +22,16 @@ class SessionService:
         await self.redis.setex(f"session:{session_id}", 3600, json.dumps(history))
 
     async def get_summary(self, user_id: str, domain_id: str) -> str:
-        # Fetch from PostgreSQL/MongoDB
-        # Returns empty string if first visit
-        return ""
+        # Read from PostgreSQL
+        async with AsyncSessionLocal() as db:
+            result = await db.execute(
+                select(UserSummary).where(
+                    UserSummary.user_id == user_id,
+                    UserSummary.domain_id == domain_id
+                )
+            )
+            record = result.scalar_one_or_none()
+            return record.summary if record else ""
     
     async def delete(self, session_id: str):
         await self.redis.delete(f"session:{session_id}")

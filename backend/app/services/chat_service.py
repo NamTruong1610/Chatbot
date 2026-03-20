@@ -49,15 +49,21 @@ class ChatService:
         return None  # No match — fall through to LLM
 
     async def _call_llm(self, message, chunks, history, summary, domain_id):
+        print(f">>> SUMMARY INJECTED: {summary}") 
         context = "\n".join(chunks)
-        system_prompt = f"""You are a booking assistant for domain {domain_id}.
-        Only use the information below to answer. Do not make anything up.
-        
+        system_prompt = f"""You are a booking assistant for domain {domain_id}. 
+        Only use the information provided in the Business Context below to answer.
+        If the answer is not found in the Business Context, say "I don't have that information, please contact us directly."
+        Do NOT use your own knowledge. Do NOT make anything up.
+
         Business Context:
         {context}
-        
+
         What we know about this user from past visits:
-        {summary}
+        {summary if summary else "This is a new user with no previous history."}
+
+        If the user has past visit history, briefly acknowledge it at the start of your response
+        before answering their current question.
         """
         messages = [{"role": "system", "content": system_prompt}]
         messages += history  # Previous turns in this session

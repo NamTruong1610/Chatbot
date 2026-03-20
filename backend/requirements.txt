@@ -13,3 +13,6 @@ redis
 pydantic
 pydantic-settings
 langchain-text-splitters
+asyncpg
+sqlalchemy
+greenlet

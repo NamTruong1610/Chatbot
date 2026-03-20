@@ -6,6 +6,8 @@ from app.middlewares.logging_middleware import LoggingMiddleware
 from app.middlewares.error_middleware import ErrorMiddleware
 from app.middlewares.auth_middleware import AuthMiddleware
 from app.config.config import settings
+from app.database import engine, Base
+from app.models import user_summary_model  
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams
 
@@ -26,6 +28,11 @@ async def lifespan(app: FastAPI):
         print(f"✓ Created collection: {settings.QDRANT_COLLECTION}")
     else:
         print(f"✓ Collection already exists: {settings.QDRANT_COLLECTION}")
+        
+    # ── PostgreSQL tables ────────────────────────────────────────
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+        print("✓ PostgreSQL tables ready")
 
     yield  # ← everything above runs on startup, everything below runs on shutdown
 
